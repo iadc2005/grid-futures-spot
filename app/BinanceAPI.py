@@ -25,6 +25,7 @@ class BinanceAPI(object):
         return requests.get(path, timeout=180, verify=True).json()
 
     def get_ticker_price(self,market):
+        time.slee(2)
         path = "%s/ticker/price" % self.BASE_URL_V3
         params = {"symbol":market}
         res =  self._get_no_sign(path,params)
