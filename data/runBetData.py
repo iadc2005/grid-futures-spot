@@ -73,6 +73,21 @@ class RunBetData:
             quantity = quantity_arr[-1]
         return quantity
 
+    def get_position_price(self):
+        '''获取现货持仓均价'''
+        data_json = self._get_json_data()
+        return data_json['runBet']['position_spot_price']
+        
+    def get_position(self):
+        '''获取是否持仓均价平仓开关'''
+        data_json = self._get_json_data()
+        return data_json['config']['position']    
+    
+    def get_position_size(self):
+        '''获取否持仓均价仓位数,满足则直接均价平'''
+        data_json = self._get_json_data()
+        return data_json['config']['position_size']        
+    
     def get_spot_step(self):
         '''获取现货仓位数'''
         data_json = self._get_json_data()
@@ -114,6 +129,12 @@ class RunBetData:
         data_json = self._get_json_data()
         data_json['runBet']['spot_step'] = spot_step
         self._modify_json_data(data_json)
+        
+    def set_position_price(self,price):
+        '''修改现货持仓均价'''
+        data_json = self._get_json_data()
+        data_json['runBet']['position_spot_price'] = price
+        self._modify_json_data(data_json)        
 
 if __name__ == "__main__":
     instance = RunBetData()

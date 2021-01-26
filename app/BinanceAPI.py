@@ -28,7 +28,6 @@ class BinanceAPI(object):
         path = "%s/ticker/price" % self.BASE_URL_V3
         params = {"symbol":market}
         res =  self._get_no_sign(path,params)
-        time.sleep(2)
         return float(res['price'])
 
     def get_ticker_24hour(self,market):
@@ -56,6 +55,13 @@ class BinanceAPI(object):
         params = self._order(market, quantity, "SELL", rate)
         return self._post(path, params)
 
+    def get_spot_trades(self, symbol):
+        '''获取账户成交历史'''
+        path = "%s/myTrades" % self.BASE_URL_V3
+        params = {"symbol":symbol}
+        time.sleep(1)
+        return self._get(path, params).json()
+
     ### --- 合约 --- ###
     def set_leverage(self,symbol, leverage):
         
@@ -66,7 +72,16 @@ class BinanceAPI(object):
         path = "%s/fapi/v1/leverage" % self.BASE_URL
         params = {'symbol':symbol, 'leverage': leverage}
         return self._post(path, params)
+
+    def get_positionInfo(self, symbol):
+        '''当前持仓交易对信息'''
+        path = "%s/fapi/v2/positionRisk" % self.FUTURE_URL
+        params = {"symbol":symbol}
+        time.sleep(1)
+        return self._get(path, params)
     
+
+        
     def limit_future_order(self,side, market, quantity, price):
         
         ''' 合约限价单
@@ -103,6 +118,13 @@ class BinanceAPI(object):
 
         return params
 
+    def _get(self, path, params={}):
+        params.update({"recvWindow": recv_window})
+        query = urlencode(self._sign(params))
+        url = "%s?%s" % (path, query)
+        header = {"X-MBX-APIKEY": self.key}
+        return requests.get(url, headers=header,timeout=30, verify=True).json()
+        
     def _get_no_sign(self, path, params={}):
         query = urlencode(params)
         url = "%s?%s" % (path, query)
