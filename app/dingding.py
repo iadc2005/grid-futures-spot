@@ -68,7 +68,7 @@ class Message:
             self.dingding_warn(error_info+str(res))
             return res
         
-    def buy_limit_future_msg(self,market, quantity, price,profit_usdt=None):
+    def buy_limit_future_msg(self,market, quantity, price,profit_usdt=0):
         '''
         合约做多单，带有钉钉消息
         :param market: 交易对
@@ -78,7 +78,6 @@ class Message:
         '''
         try:
             res = BinanceAPI(api_key,api_secret).limit_future_order('BUY', market, quantity, price)
-            print(res)
             if res['orderId']:
                 buy_info = "报警：币种为：{cointype}。买入做多价格为：{price}。数量为：{num}。盈利USDT数为:{profit_usdt}".format(cointype=market,price=price,num=quantity,profit_usdt=abs(profit_usdt))
                 self.dingding_warn(buy_info)

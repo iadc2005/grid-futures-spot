@@ -56,6 +56,16 @@ class RunBetData:
             quantity = quantity_arr[-1]
         return quantity
 
+    def get_spot_list(self):
+        '''获取仓位数组'''
+        data_json = self._get_json_data()
+        return data_json["config"]["spot_quantity"]
+
+    def get_future_list(self):
+        '''获取仓位数组'''
+        data_json = self._get_json_data()
+        return data_json["config"]["future_quantity"]
+
     def get_future_quantity(self,exchange_method=True):
         '''
         :param exchange: True 代表买入，取买入的仓位 False：代表卖出，取卖出应该的仓位
@@ -135,6 +145,15 @@ class RunBetData:
         data_json = self._get_json_data()
         data_json['runBet']['position_spot_price'] = price
         self._modify_json_data(data_json)        
+
+    def delete_extra_zero(self,n):
+        '''删除小数点后多余的0'''
+        if isinstance(n, int):
+            return n
+        if isinstance(n, float):
+            n = str(n).rstrip('0')  # 删除小数点后多余的0
+            n = int(n.rstrip('.')) if n.endswith('.') else float(n)  # 只剩小数点直接转int，否则转回float
+            return n
 
 if __name__ == "__main__":
     instance = RunBetData()

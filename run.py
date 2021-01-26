@@ -42,9 +42,14 @@ class Run_Main():
                     if spot_step == 0: # 没有持仓均价,初始化持仓均价
                         runbet.set_position_price(grid_buy_price)
                     else:
-                        total_num=0
-                        for index in range(spot_step):  # 现货当前持有总量
-                            total_num = total_num + runbet.get_spot_quantity(index) 
+                        total_num = 0 # 现货当前持有总量
+                        for index in range(spot_step):
+                            print(index)
+                            list = runbet.get_spot_list()
+                            if index >= len(list):
+                                total_num = total_num + list[-1]
+                            else:
+                                total_num = total_num + list[index]
                             
                         usdt_num = runbet.get_position_price() * total_num #花费总u数：目的计算->持仓均价  
                         tmp_sudt = spot_quantity * grid_buy_price  
@@ -73,31 +78,41 @@ class Run_Main():
                 else:
                     break
                 
-            # 开起了持仓均价平仓并且仓位数达到了5手
-            elif runbet.get_position and runbet.get_spot_step() >= runbet.get_position_size():
-                if cur_market_price > runbet.get_position_price(): # 持仓均价小于 市场价 则全部平仓
-                    total_num = 0
-                    for index in range(spot_step):  # 现货当前持有总量
-                        total_num = total_num + runbet.get_spot_quantity(index)
-                        
-                    future_res = msg.sell_limit_msg(self.coinType, total_num, cur_market_price) # 现货全部平仓
-                    if future_res['orderId']:
-                        runbet.set_spot_step(0) 
-                        runbet.set_position_price(0)
-                        time.sleep(60*1)  # 暂停运行1分钟                    
-            
-            elif runbet.get_position and runbet.get_future_step() >= runbet.get_position_size():
+            # 现货满足持仓均价平仓并且仓位数达到了指定手数
+            elif runbet.get_position and runbet.get_spot_step() >= runbet.get_position_size() and cur_market_price > runbet.get_position_price():
+                # 持仓均价小于 市场价 则全部平仓
+
+                total_num = 0  # 期货当前持有总量
+                for index in range(spot_step):
+                    print(index)
+                    list = runbet.get_spot_list()
+                    if index >= len(list):
+                        total_num = total_num + list[-1]
+                    else:
+                        total_num = total_num + list[index]
+                    
+                future_res = msg.sell_limit_msg(self.coinType, total_num, round(cur_market_price,2)) # 现货全部平仓
+                if future_res['orderId']:
+                    runbet.set_spot_step(0) 
+                    runbet.set_position_price(0)
+                    time.sleep(60*1)  # 暂停运行1分钟                    
+
+            # 期货持仓均价 满足 全部平仓
+            elif runbet.get_position and future_step >= runbet.get_position_size():
                 res = binan.get_positionInfo(self.coinType)[0]
                 
-                if cur_market_price < res['entryPrice']: # 期货持仓均价小于 市场价 则全部平仓
+                total_num = runbet.delete_extra_zero(abs(float(res['positionAmt']))) / float(res['leverage'])
+
+                print(res['entryPrice'])
+                if cur_market_price < float(res['entryPrice']): # 期货持仓均价小于 市场价 则全部平仓
                         
-                    future_res = msg.buy_limit_future_msg(self.coinType, float(res['positionAmt']), cur_market_price) # 现货全部平仓
+                    future_res = msg.buy_limit_future_msg(self.coinType, total_num, round(cur_market_price,2)) # 现货全部平仓
                     if future_res['orderId']:
-                        runbet.set_spot_step(0) 
+                        runbet.set_future_step(0)
                         time.sleep(60*1)  # 暂停运行1分钟                  
-            else:
-                print("当前市价：{market_price}。未能满足交易,继续运行".format(market_price = cur_market_price))
-                time.sleep(2) # 为了不被币安api请求次数限制
+
+            print("当前市价：{market_price}。未能满足交易,继续运行".format(market_price = cur_market_price))
+            time.sleep(2) # 为了不被币安api请求次数限制
 
 
 # if __name__ == "__main__":
@@ -110,5 +125,5 @@ class Run_Main():
 
 #调试看报错运行下面，正式运行用上面       
 if __name__ == "__main__":       
-   instance = Run_Main()    
+   instance = Run_Main()
    instance.loop_run()
