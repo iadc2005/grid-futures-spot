@@ -100,8 +100,10 @@ class Run_Main():
             # 期货持仓均价 满足 全部平仓
             elif runbet.get_position and future_step >= runbet.get_position_size():
                 res = binan.get_positionInfo(self.coinType)[0]
-                
-                total_num = runbet.delete_extra_zero(abs(float(res['positionAmt']))) / float(res['leverage'])
+
+                # total_num = runbet.delete_extra_zero(abs(float(res['positionAmt']))) / float(res['leverage'])
+                # Alex: not correct for the above algorithm
+                total_num = runbet.delete_extra_zero(abs(float(res['positionAmt'])))
 
                 print(res['entryPrice'])
                 if cur_market_price < float(res['entryPrice']): # 期货持仓均价小于 市场价 则全部平仓

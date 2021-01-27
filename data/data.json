@@ -1,0 +1,21 @@
+{
+    "runBet": {
+        "next_buy_price": 29640.21,
+        "grid_sell_price": 31512.22,
+        "spot_step": 0,
+        "future_step": 0,
+        "position_spot_price": 0
+    },
+    "config": {
+        "profit_ratio": 1,
+        "double_throw_ratio": 5,
+        "cointype": "BTCUSDT",
+        "position_size": 1,
+        "spot_quantity": [
+            0.01
+        ],
+        "future_quantity": [
+            0.03
+        ]
+    }
+}
